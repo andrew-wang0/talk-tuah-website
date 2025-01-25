@@ -11,3 +11,5 @@ venv/
 .env.local/
 .env
 *.venv
+
+browser/tmp/*
