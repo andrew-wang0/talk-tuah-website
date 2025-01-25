@@ -64,18 +64,19 @@ class AssistantFnc(llm.FunctionContext):
                     logger.error(f"Error fetching TOC for {website_url}: {response}")
                     raise Exception(f"An error occurred while fetching the TOC for {website_url}.")
                 
+    @llm.ai_callable()
     async def start_reading(
         self,
         start: Annotated[
             str, llm.TypeInfo(description="Start reading the content of the website")
         ],
     ):
-        """Called when the user asks to read the contents. This function will ask the agent to start reading the content."""
+        """Called when the user asks to read the contents."""
         logger.info(f"reading the content from {start}")
         
 
         async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
+            async with session.get(start) as response:
                 if response.status == 200:
                     content = await response.text()
                     return f"Content of the website: \n{content}"
@@ -119,6 +120,7 @@ async def entrypoint(ctx: JobContext):
         tts=openai.TTS(),
         chat_ctx=initial_ctx,
         fnc_ctx=fnc_ctx,
+        max_nested_fnc_calls=5
     )
 
     agent.start(ctx.room, participant)
