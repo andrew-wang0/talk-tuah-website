@@ -143,11 +143,14 @@ class BrowserController:
         element.send_keys(keys)
 
     async def table_of_contents(self):
-        img = self.screenshot()
-        llm = LLM()
-        toc = await llm.table_of_contents(self.html(), img)
+        # img = self.screenshot()
+        # llm = LLM()
+        # toc = await llm.table_of_contents(self.html(), img)
+        #
+        # with open(f"{self.tmp}/toc.md", "w") as file:
+        #     file.write(toc)
 
-        with open(f"{self.tmp}/toc.md", "w") as file:
-            file.write(toc)
+        with open(f"{self.tmp}/../cache/toc.md") as f:
+            toc = f.read()
 
         return toc
