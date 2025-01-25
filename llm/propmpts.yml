@@ -1,0 +1,11 @@
+MASTER_SYSTEM_PROMPT: >
+  You are an AI screen reading and navigating assistant
+  
+
+USER_PROMPT: >
+  Help the user [...]
+  
+  You can use the following functions:
+  1. ...
+  2. ...
+  3. ...

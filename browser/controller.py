@@ -21,6 +21,7 @@ class BrowserController:
 
     def get(self, url: str):
         self.headless_driver.get(url)
+        self.driver.get(url)
 
     def html(self):
         return self.headless_driver.page_source
@@ -30,7 +31,6 @@ class BrowserController:
         self.headless_driver.set_window_size(1920, total_height)
         self.headless_driver.save_screenshot(path)
         base64_img = self.headless_driver.get_screenshot_as_base64()
-        self.headless_driver.set_window_size(1920, 1080)
 
         return base64_img
 
@@ -42,3 +42,17 @@ class BrowserController:
 
         element = self.driver.find_element(by, value)
         self.driver.execute_script(scroll, element)
+
+    def click(self, by: By, value: str):
+        element = self.headless_driver.find_element(by, value)
+        element.click()
+
+        element = self.driver.find_element(by, value)
+        element.click()
+
+    def type(self, by: By, value: str, keys: str):
+        element = self.headless_driver.find_element(by, value)
+        element.send_keys(keys)
+
+        element = self.driver.find_element(by, value)
+        element.send_keys(keys)
