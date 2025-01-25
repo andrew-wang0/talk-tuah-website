@@ -30,6 +30,10 @@ class AssistantFnc(llm.FunctionContext):
         super().__init__()
         self.bc = None
 
+    def __init__(self):
+        super().__init__()
+        self.bc = None
+
     # the llm.ai_callable decorator marks this function as a tool available to the LLM
     # by default, it'll use the docstring as the function's description
     @llm.ai_callable()
@@ -62,7 +66,7 @@ class AssistantFnc(llm.FunctionContext):
 
                     return f"The TOC of this {website_url} is {TOC}."
                 else:
-                    logger.error(f"Error fetching TOC for {website_url}: {response}")
+                    logger.error(f"Error fetching TOC for {website_url}: {e}")
                     raise Exception(f"An error occurred while fetching the TOC for {website_url}.")
 
 fnc_ctx = AssistantFnc()
@@ -90,7 +94,7 @@ async def entrypoint(ctx: JobContext):
     participant = await ctx.wait_for_participant()
     logger.info(f"starting voice assistant for participant {participant.identity}")
     
-    llm = openai.LLM(model="gpt-4o-mini")
+    oai = openai.LLM(model="gpt-4o-mini")
 
     # This project is configured to use Deepgram STT, OpenAI LLM and TTS plugins
     # Other great providers exist like Cartesia and ElevenLabs
@@ -99,7 +103,7 @@ async def entrypoint(ctx: JobContext):
     agent = VoicePipelineAgent(
         vad=ctx.proc.userdata["vad"],
         stt=deepgram.STT(),
-        llm=llm,
+        llm=oai,
         tts=openai.TTS(),
         chat_ctx=initial_ctx,
         fnc_ctx=fnc_ctx,
@@ -117,7 +121,7 @@ async def entrypoint(ctx: JobContext):
 
         chat_ctx = agent.chat_ctx.copy()
         chat_ctx.append(role="user", text=msg)
-        stream = llm.chat(chat_ctx=chat_ctx)
+        stream = oai.chat(chat_ctx=chat_ctx, fnc_ctx=fnc_ctx)
         asyncio.create_task(agent.say(stream))
 
     # The agent should be polite and greet the user when it joins :)
