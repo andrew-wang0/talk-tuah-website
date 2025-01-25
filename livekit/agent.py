@@ -12,10 +12,53 @@ from livekit.agents import (
 from livekit.agents.pipeline import VoicePipelineAgent
 from livekit.plugins import openai, deepgram, silero
 
-
 load_dotenv(dotenv_path=".env.local")
 logger = logging.getLogger("voice-agent")
 
+import aiohttp
+from typing import Annotated
+
+from livekit.agents import llm
+from livekit.agents.multimodal import MultimodalAgent
+
+from browser.controller import BrowserController
+
+bc = BrowserController()
+
+# first define a class that inherits from llm.FunctionContext
+class AssistantFnc(llm.FunctionContext):
+    # the llm.ai_callable decorator marks this function as a tool available to the LLM
+    # by default, it'll use the docstring as the function's description
+    @llm.ai_callable()
+    async def get_toc(
+        self,
+        # by using the Annotated type, arg description and type are available to the LLM
+        location: Annotated[
+            str, llm.TypeInfo(description="URL of the website to get the Table of Contents")
+        ],
+    ):
+        """Called when the user asks about the table of contents of a website. This function will return the table of content for the given website."""
+        logger.info(f"getting TOC for {website_url}")
+
+        if not website_url.startswith("http://", "https://"):
+            website_url = "http://" + website_url
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(website_url) as response:
+                if response.status == 200:
+                    html_content = await response.text()
+                    # response from the function call is returned to the LLM
+                    # as a tool response. The LLM's response will include this data
+                    
+                    await bc.get(website_url)
+                    TOC = await bc.table_of_contents()
+
+                    return f"The TOC of this {website_url} is {TOC}."
+                else:
+                    logger.error(f"Error fetching TOC for {website_url}: {e}")
+                    raise Exception(f"An error occurred while fetching the TOC: {str(e)}")
+
+fnc_ctx = AssistantFnc()
 
 def prewarm(proc: JobProcess):
     proc.userdata["vad"] = silero.VAD.load()
@@ -48,6 +91,7 @@ async def entrypoint(ctx: JobContext):
         llm=openai.LLM(model="gpt-4o-mini"),
         tts=openai.TTS(),
         chat_ctx=initial_ctx,
+        fnc_ctx=fnc_ctx,
     )
 
     agent.start(ctx.room, participant)
