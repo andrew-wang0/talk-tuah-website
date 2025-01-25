@@ -29,6 +29,10 @@ class AssistantFnc(llm.FunctionContext):
         super().__init__()
         self.bc = None
 
+    def __init__(self):
+        super().__init__()
+        self.bc = None
+
     # the llm.ai_callable decorator marks this function as a tool available to the LLM
     # by default, it'll use the docstring as the function's description
     @llm.ai_callable()
@@ -42,8 +46,9 @@ class AssistantFnc(llm.FunctionContext):
         """Called when the user asks about the table of contents of a website. This function will return the table of content for the given website."""
         logger.info(f"getting TOC for {website_url}")
 
-        if not website_url.startswith("http://", "https://"):
+        if not website_url.startswith(("http://", "https://")):
             website_url = "http://" + website_url
+            logger.debug(f"Updated website URL to: {website_url}")
 
         async with aiohttp.ClientSession() as session:
             async with session.get(website_url) as response:
@@ -58,10 +63,13 @@ class AssistantFnc(llm.FunctionContext):
                     await self.bc.get(website_url)
                     TOC = await self.bc.table_of_contents()
 
-                    return f"The TOC of this {website_url} is {TOC}."
-                else:
-                    logger.error(f"Error fetching TOC for {website_url}: {e}")
-                    raise Exception(f"An error occurred while fetching the TOC: {str(e)}")
+                        return f"The TOC of this {website_url} is {TOC}."
+                    else:
+                        logger.error(f"Error fetching TOC for {website_url}: {e}")
+                        raise Exception
+        except Exception as e:
+            logger.error(f"Error fetching TOC for {website_url}: {e}")
+            raise Exception(f"An error occurred while fetching the TOC for {website_url}.")
 
 fnc_ctx = AssistantFnc()
 
