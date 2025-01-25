@@ -61,7 +61,7 @@ class AssistantFnc(llm.FunctionContext):
 
                     return f"The TOC of this {website_url} is {TOC}."
                 else:
-                    logger.error(f"Error fetching TOC for {website_url}: {e}")
+                    logger.error(f"Error fetching TOC for {website_url}: {response}")
                     raise Exception(f"An error occurred while fetching the TOC for {website_url}.")
 
 fnc_ctx = AssistantFnc()
