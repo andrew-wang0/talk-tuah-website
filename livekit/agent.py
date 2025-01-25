@@ -114,9 +114,13 @@ async def entrypoint(ctx: JobContext):
     # https://docs.livekit.io/agents/plugins
     agent = VoicePipelineAgent(
         vad=ctx.proc.userdata["vad"],
-        stt=deepgram.STT(),
-        llm=oai,
-        tts=openai.TTS(),
+        # stt=deepgram.STT(),
+        # llm=oai,
+        # tts=openai.TTS(),
+        stt=openai.STT(),
+        llm=openai.LLM.with_ollama(model="llama3.2"),
+        # tts=deepgram.TTS(base_url='https://fitting-correctly-lioness.ngrok-free.app/v1/speak_http'),
+        tts=deepgram.TTS(),
         chat_ctx=initial_ctx,
         fnc_ctx=fnc_ctx,
     )
