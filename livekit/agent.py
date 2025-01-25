@@ -63,13 +63,10 @@ class AssistantFnc(llm.FunctionContext):
                     await self.bc.get(website_url)
                     TOC = await self.bc.table_of_contents()
 
-                        return f"The TOC of this {website_url} is {TOC}."
-                    else:
-                        logger.error(f"Error fetching TOC for {website_url}: {e}")
-                        raise Exception
-        except Exception as e:
-            logger.error(f"Error fetching TOC for {website_url}: {e}")
-            raise Exception(f"An error occurred while fetching the TOC for {website_url}.")
+                    return f"The TOC of this {website_url} is {TOC}."
+                else:
+                    logger.error(f"Error fetching TOC for {website_url}: {e}")
+                    raise Exception(f"An error occurred while fetching the TOC for {website_url}.")
 
 fnc_ctx = AssistantFnc()
 
