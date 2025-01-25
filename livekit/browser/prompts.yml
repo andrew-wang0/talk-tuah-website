@@ -6,5 +6,14 @@ TABLE_OF_CONTENTS: >
   Respond with a markdown version of the website's table of contents that is easily accessible.
   The table of contents should outline the important sections of the webpage.
   Do not include all the content of the webpage in the table of contents, only the important section headers.
-  Use hashtags to denote the heading levels.
+  Only use hashtags to denote the heading levels. Do not use lists "-".
+  Do not wrap the markdown in a code block.
+
+CONTENTS: >
+  You will be given raw html and a screenshot of the respective webpage. 
+  You will also be given a table of contents in markdown format.
+  Respond with a markdown version of the website's contents using the table of contents as a guide.
+  The contents should contain all the information that is present on the webpage.
+  Keep all images on the page. If alt text is not present for an image, generate a it for the image.
+  Do not include images that do not exist on the page, such as the screenshot that is given to you.
   Do not wrap the markdown in a code block.

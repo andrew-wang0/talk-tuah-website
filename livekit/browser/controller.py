@@ -59,7 +59,7 @@ class BrowserController:
 
         soup = BeautifulSoup(html_content, 'lxml')
 
-        for tag in soup(['script', 'style', 'link', 'svg', 'iframe']):
+        for tag in soup(['script', 'style', 'link', 'svg', 'iframe', 'noscript']):
             tag.decompose()
 
         for comment in soup.find_all(string=lambda text: isinstance(text, Comment)):
@@ -78,6 +78,8 @@ class BrowserController:
                 text_node.replace_with(truncated_text)
 
         for tag in reversed(soup.find_all()):
+            if tag.name in ['img', 'button', 'input', 'select', 'textarea']:
+                continue
             if not tag.find(True) and not tag.get_text(strip=True):
                 tag.decompose()
 
@@ -142,15 +144,30 @@ class BrowserController:
         element = self.driver.find_element(by, value)
         element.send_keys(keys)
 
-    async def table_of_contents(self):
-        # img = self.screenshot()
-        # llm = LLM()
-        # toc = await llm.table_of_contents(self.html(), img)
-        #
-        # with open(f"{self.tmp}/toc.md", "w") as file:
-        #     file.write(toc)
+    async def generate_table_of_contents(self):
+        img = self.screenshot()
+        llm = LLM()
+        toc = await llm.table_of_contents(self.html(), img)
 
-        with open(f"{self.tmp}/../cache/toc.md") as f:
-            toc = f.read()
+        with open(f"{self.tmp}/toc.md", "w") as file:
+            file.write(toc)
 
         return toc
+
+    def get_table_of_contents(self):
+        with open(f"{self.tmp}/toc.md") as f:
+            return f.read()
+
+    async def generate_contents(self):
+        img = self.screenshot()
+        llm = LLM()
+        toc = await llm.contents(self.html(), self.get_table_of_contents(), img)
+
+        with open(f"{self.tmp}/contents.md", "w") as file:
+            file.write(toc)
+
+        return toc
+
+    def get_contents(self):
+        with open(f"{self.tmp}/contents.md") as f:
+            return f.read()
