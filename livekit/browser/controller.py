@@ -1,5 +1,8 @@
 import base64
 import io
+import re
+from bs4 import BeautifulSoup
+import lxml
 from PIL import Image
 
 from selenium import webdriver
@@ -42,7 +45,19 @@ class BrowserController:
         self.headless_driver.set_window_size(1920, total_height)
 
     def html(self):
-        return self.headless_driver.page_source
+        html =  self.headless_driver.page_source
+        html = re.sub(r'<script.*?</script>', '', html, flags=re.DOTALL)
+        html = re.sub(r'<style.*?</style>', '', html, flags=re.DOTALL)
+        html = re.sub(r'<link.*?/>', '', html, flags=re.DOTALL)
+        html = re.sub(r'<!--.*?-->', '', html, flags=re.DOTALL)
+
+        soup = BeautifulSoup(html, 'lxml')
+        html = soup.prettify()
+
+        with open("./tmp/html.html", "w") as file:
+            file.write(html)
+
+        return html
 
     def screenshot(self, path: str = "./tmp/screenshot"):
         total_height = self.headless_driver.execute_script("return document.body.parentNode.scrollHeight")
