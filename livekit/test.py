@@ -5,7 +5,7 @@ from browser.controller import BrowserController
 
 async def main():
     controller = BrowserController()
-    controller.get("https://discord.com/channels/@me/1331877772443914333/1332816744435290152")
+    controller.get("https://afampointofview.com/the-worst-article-i-ever-wrote/")
 
     start = time.perf_counter()
     await controller.table_of_contents()

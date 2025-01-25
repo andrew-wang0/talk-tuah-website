@@ -52,8 +52,6 @@ class AssistantFnc(llm.FunctionContext):
             async with session.get(website_url) as response:
                 if response.status == 200:
                     html_content = await response.text()
-                    # response from the function call is returned to the LLM
-                    # as a tool response. The LLM's response will include this data
 
                     if not self.bc:
                         self.bc = BrowserController()
@@ -65,12 +63,29 @@ class AssistantFnc(llm.FunctionContext):
                 else:
                     logger.error(f"Error fetching TOC for {website_url}: {response}")
                     raise Exception(f"An error occurred while fetching the TOC for {website_url}.")
+                
+    async def start_reading(
+        self,
+        start: Annotated[
+            str, llm.TypeInfo(description="Start reading the content of the website")
+        ],
+    ):
+        """Called when the user asks to read the contents. This function will ask the agent to start reading the content."""
+        logger.info(f"reading the content from {start}")
+        
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    content = await response.text()
+                    return f"Content of the website: \n{content}"
+                else:
+                    raise f"Failed to get the content {response.status}"
 
 fnc_ctx = AssistantFnc()
 
 def prewarm(proc: JobProcess):
     proc.userdata["vad"] = silero.VAD.load()
-
 
 async def entrypoint(ctx: JobContext):
     from livekit.agents import llm
