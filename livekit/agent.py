@@ -120,7 +120,8 @@ async def entrypoint(ctx: JobContext):
         tts=openai.TTS(),
         chat_ctx=initial_ctx,
         fnc_ctx=fnc_ctx,
-        max_nested_fnc_calls=5
+        max_nested_fnc_calls=5,
+        allow_interruptions=True,
     )
 
     agent.start(ctx.room, participant)

@@ -309,6 +309,18 @@ export default function Playground({
                         />
                     </ConfigurationPanelItem>
                 </div>
+                <div className="w-full">
+                    <ConfigurationPanelItem title="Audio">
+                        {config.settings.outputs.audio && (
+                            <PlaygroundTile
+                                className="w-full h-full grow"
+                                childrenClassName="justify-center"
+                            >
+                                {audioTileContent}
+                            </PlaygroundTile>
+                        )}
+                    </ConfigurationPanelItem>
+                </div>
                 {config.show_qr && (
                     <div className="w-full">
                         <ConfigurationPanelItem title="QR Code">
@@ -417,6 +429,11 @@ export default function Playground({
                             : "flex"
                     }`}
                 >
+                    <PlaygroundTile
+                        title="Browser"
+                        className="w-full h-full grow"
+                        childrenClassName="justify-center"
+                    />
                     {/* {config.settings.outputs.video && (
                         <PlaygroundTile
                             title="Video"
@@ -426,7 +443,7 @@ export default function Playground({
                             {videoTileContent}
                         </PlaygroundTile>
                     )} */}
-                    {config.settings.outputs.audio && (
+                    {/* {config.settings.outputs.audio && (
                         <PlaygroundTile
                             title="Audio"
                             className="w-full h-full grow"
@@ -434,7 +451,7 @@ export default function Playground({
                         >
                             {audioTileContent}
                         </PlaygroundTile>
-                    )}
+                    )} */}
                 </div>
 
                 {config.settings.chat && (
