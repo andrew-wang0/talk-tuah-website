@@ -8,8 +8,8 @@ import os
 
 load_dotenv()
 
-class ChatService:
-    def __init__(self, model: str = "gpt-4o", send_message: Callable | None = None):
+class LLM:
+    def __init__(self, model: str = "gpt-4o-mini", send_message: Callable | None = None):
         self.model: str = model
         self.client: AsyncOpenAI = AsyncOpenAI()
         self.messages: List[ChatCompletionMessageParam] = []
@@ -21,15 +21,15 @@ class ChatService:
 
         system_message: Dict[str, Any] = {
             "role": "system",
-            "content": self.prompts["MASTER_SYSTEM_PROMPT"]
+            "content": self.prompts["MASTER_SYSTEM"]
         }
 
         self.messages.append(cast(ChatCompletionSystemMessageParam, system_message))
 
-    async def prompt(self, message: str, image: Optional[str] = None) -> str:
+    async def table_of_contents(self, html: str, image: Optional[str] = None) -> str:
         system_message: Dict[str, Any] = {
             "role": "system",
-            "content": self.prompts["USER_PROMPT"]
+            "content": self.prompts["TABLE_OF_CONTENTS"]
         }
         self.messages.append(cast(ChatCompletionSystemMessageParam, system_message))
 
@@ -37,7 +37,7 @@ class ChatService:
             content: List[Dict[str, Any]] = [
                 {
                     "type": "text",
-                    "text": message
+                    "text": html
                 },
                 {
                     "type": "image_url",
@@ -50,7 +50,7 @@ class ChatService:
         else:
             content = [{
                 "type": "text",
-                "text": message
+                "text": html
             }]
 
         user_message: Dict[str, Any] = {
@@ -73,7 +73,3 @@ class ChatService:
         self.messages.append(cast(ChatCompletionAssistantMessageParam, assistant_message))
 
         return response
-
-
-    async def reformat(self):
-        pass

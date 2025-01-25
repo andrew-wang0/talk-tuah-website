@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-
+from llm import LLM
 
 class BrowserController:
     def __init__(self):
@@ -43,6 +43,24 @@ class BrowserController:
         element = self.driver.find_element(by, value)
         self.driver.execute_script(scroll, element)
 
+    def scroll_up(self, pixels: int = 500):
+        scroll_script = f"window.scrollBy({{ top: -{pixels}, left: 0, behavior: 'smooth' }});"
+        self.headless_driver.execute_script(scroll_script)
+        self.driver.execute_script(scroll_script)
+
+    def scroll_down(self, pixels: int = 500):
+        scroll_script = f"window.scrollBy({{ top: {pixels}, left: 0, behavior: 'smooth' }});"
+        self.headless_driver.execute_script(scroll_script)
+        self.driver.execute_script(scroll_script)
+
+    def scroll_top(self):
+        self.headless_driver.execute_script("window.scrollTo(0, 0);")
+        self.driver.execute_script("window.scrollTo(0, 0);")
+
+    def scroll_bottom(self):
+        self.headless_driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
     def click(self, by: By, value: str):
         element = self.headless_driver.find_element(by, value)
         element.click()
@@ -56,3 +74,10 @@ class BrowserController:
 
         element = self.driver.find_element(by, value)
         element.send_keys(keys)
+
+    async def table_of_contents(self):
+        img = self.screenshot()
+        llm = LLM()
+        toc = await llm.table_of_contents(self.html(), img)
+
+        return toc
