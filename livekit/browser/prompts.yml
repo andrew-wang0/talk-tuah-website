@@ -5,5 +5,6 @@ TABLE_OF_CONTENTS: >
   You will be given raw html and a screenshot of the respective webpage.
   Respond with a markdown version of the website's table of contents that is easily accessible.
   The table of contents should outline the important sections of the webpage.
+  Do not include all the content of the webpage in the table of contents, only the important section headers.
   Use hashtags to denote the heading levels.
   Do not wrap the markdown in a code block.

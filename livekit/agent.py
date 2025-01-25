@@ -58,7 +58,7 @@ class AssistantFnc(llm.FunctionContext):
                     if not self.bc:
                         self.bc = BrowserController()
                     
-                    await self.bc.get(website_url)
+                    self.bc.get(website_url)
                     TOC = await self.bc.table_of_contents()
 
                     return f"The TOC of this {website_url} is {TOC}."
