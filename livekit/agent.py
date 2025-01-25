@@ -9,7 +9,6 @@ from livekit.agents import (
     JobProcess,
     WorkerOptions,
     cli,
-    llm,
 )
 from livekit.agents.pipeline import VoicePipelineAgent
 from livekit.plugins import openai, deepgram, silero
@@ -73,6 +72,8 @@ def prewarm(proc: JobProcess):
 
 
 async def entrypoint(ctx: JobContext):
+    from livekit.agents import llm
+
     initial_ctx = llm.ChatContext().append(
         role="system",
         text=(
