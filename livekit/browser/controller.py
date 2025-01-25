@@ -1,14 +1,14 @@
 import base64
 import io
-import re
 from bs4 import BeautifulSoup, Comment
-import lxml
 from PIL import Image
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from .gpt import LLM
+from pathlib import Path
+
 
 def image_to_base64(pil_image, format='JPEG'):
     buffered = io.BytesIO()
@@ -18,8 +18,18 @@ def image_to_base64(pil_image, format='JPEG'):
     return encoded_image
 
 
+def find_tmp_folder():
+    current_dir = Path.cwd()
+    tmp_folders = list(current_dir.rglob('tmp'))  # rglob searches recursively
+    tmp_folders = [folder.resolve() for folder in tmp_folders if folder.is_dir()]
+
+    return str(tmp_folders[0])
+
+
 class BrowserController:
     def __init__(self):
+        self.tmp = find_tmp_folder()
+
         headless_options = Options()
         headless_options.add_argument("--window-size=1920,1080")
         headless_options.add_argument("--headless")
@@ -49,7 +59,7 @@ class BrowserController:
 
         soup = BeautifulSoup(html_content, 'lxml')
 
-        for tag in soup(['script', 'style', 'link', 'svg']):
+        for tag in soup(['script', 'style', 'link', 'svg', 'iframe']):
             tag.decompose()
 
         for comment in soup.find_all(string=lambda text: isinstance(text, Comment)):
@@ -61,20 +71,21 @@ class BrowserController:
 
         pretty_html = soup.prettify()
 
-        with open("./tmp/html.html", "w", encoding='utf-8') as file:
+        with open(f"{self.tmp}/html.html", "w", encoding='utf-8') as file:
             file.write(pretty_html)
 
         # Return the prettified HTML
         return pretty_html
 
-    def screenshot(self, path: str = "./tmp/screenshot"):
+    def screenshot(self):
+        base = f"{self.tmp}/screenshot"
         total_height = self.headless_driver.execute_script("return document.body.parentNode.scrollHeight")
         self.headless_driver.set_window_size(1920, total_height)
-        self.headless_driver.save_screenshot(path + ".png")
+        self.headless_driver.save_screenshot(base + ".png")
 
-        img = Image.open(path + ".png")
-        img.save(path + ".jpg", "JPEG")
-        jpg = Image.open(path + ".jpg")
+        img = Image.open(base + ".png")
+        img.save(base + ".jpg", "JPEG")
+        jpg = Image.open(base + ".jpg")
         base64_img = image_to_base64(jpg)
 
         return base64_img
@@ -125,8 +136,7 @@ class BrowserController:
         llm = LLM()
         toc = await llm.table_of_contents(self.html(), img)
 
-        with open("./tmp/toc.md", "w") as file:
+        with open(f"{self.tmp}/toc.md", "w") as file:
             file.write(toc)
 
         return toc
-
