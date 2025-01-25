@@ -1,2 +1,13 @@
+*.lnk
+*.wav
+__pycache__/
+__pycache__
+**/.env
 .idea
-.venv
+
+.venv/
+venv/
+.env.local
+.env.local/
+.env
+*.venv
