@@ -69,12 +69,19 @@ class BrowserController:
             if 'class' in tag.attrs:
                 del tag.attrs['class']
 
+        text_limit = 500
+        for text_node in soup.find_all(string=True):
+            if not text_node.strip():
+                continue
+            if len(text_node) > text_limit:
+                truncated_text = text_node[:text_limit] + '...'
+                text_node.replace_with(truncated_text)
+
         pretty_html = soup.prettify()
 
         with open(f"{self.tmp}/html.html", "w", encoding='utf-8') as file:
             file.write(pretty_html)
 
-        # Return the prettified HTML
         return pretty_html
 
     def screenshot(self):

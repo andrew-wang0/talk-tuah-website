@@ -5,7 +5,7 @@ from browser.controller import BrowserController
 
 async def main():
     controller = BrowserController()
-    controller.get("https://example.com/")
+    controller.get("https://www.nytimes.com/")
 
     start = time.perf_counter()
     await controller.table_of_contents()

@@ -6,7 +6,7 @@ from openai.types.chat import ChatCompletionMessageParam, ChatCompletionSystemMe
     ChatCompletionUserMessageParam, ChatCompletionAssistantMessageParam
 import os
 
-load_dotenv("../.env")
+load_dotenv(".env.local")
 
 class LLM:
     def __init__(self, model: str = "gpt-4o", send_message: Callable | None = None):
