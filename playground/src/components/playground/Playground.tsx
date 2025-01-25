@@ -142,7 +142,7 @@ export default function Playground({
         }
 
         return (
-            <div className="flex flex-col w-full grow text-gray-950 bg-black rounded-sm border border-gray-800 relative">
+            <div className="flex flex-col w-full grow text-gray-950  rounded-sm border border-gray-800 relative">
                 {content}
             </div>
         );
@@ -417,7 +417,7 @@ export default function Playground({
                             : "flex"
                     }`}
                 >
-                    {config.settings.outputs.video && (
+                    {/* {config.settings.outputs.video && (
                         <PlaygroundTile
                             title="Video"
                             className="w-full h-full grow"
@@ -425,7 +425,7 @@ export default function Playground({
                         >
                             {videoTileContent}
                         </PlaygroundTile>
-                    )}
+                    )} */}
                     {config.settings.outputs.audio && (
                         <PlaygroundTile
                             title="Audio"
@@ -447,7 +447,7 @@ export default function Playground({
                 )}
                 <PlaygroundTile
                     padding={false}
-                    backgroundColor="gray-950"
+                    // backgroundColor="gray-950"
                     className="h-full w-full basis-1/4 items-start overflow-y-auto hidden max-w-[480px] lg:flex"
                     childrenClassName="h-full grow items-start"
                 >

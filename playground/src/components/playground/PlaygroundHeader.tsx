@@ -44,7 +44,7 @@ export const PlaygroundHeader = ({
                 </div>
             </div>
             <div className="flex basis-1/3 justify-end items-center gap-2">
-                {githubLink && (
+                {/* {githubLink && (
                     <a
                         href={githubLink}
                         target="_blank"
@@ -52,7 +52,7 @@ export const PlaygroundHeader = ({
                     >
                         <GithubSVG />
                     </a>
-                )}
+                )} */}
                 {config.settings.editable && <SettingsDropdown />}
                 <Button
                     accentColor={
@@ -64,6 +64,7 @@ export const PlaygroundHeader = ({
                     onClick={() => {
                         onConnectClicked();
                     }}
+                    className="h-9 items-center flex"
                 >
                     {connectionState === ConnectionState.Connecting ? (
                         <LoadingSVG />

@@ -1,3 +1,5 @@
+import { cn } from "@/lib/cn";
+
 type ChatMessageProps = {
     message: string;
     accentColor: string;
@@ -14,7 +16,7 @@ export const ChatMessage = ({
     hideName,
 }: ChatMessageProps) => {
     return (
-        <div className={`flex flex-col gap-1 ${hideName ? "pt-0" : "pt-6"}`}>
+        <div className={`flex flex-col gap-0 ${hideName ? "pt-0" : "pt-6"}`}>
             {!hideName && (
                 <div
                     className={`text-${
@@ -27,11 +29,13 @@ export const ChatMessage = ({
                 </div>
             )}
             <div
-                className={`pr-4 text-${
-                    isSelf ? "gray-300" : accentColor + "-500"
-                } text-lg leading-snug ${
-                    isSelf ? "" : "drop-shadow-" + accentColor
-                } whitespace-pre-line`}
+                className={cn(
+                    "pr-4 text-lg leading-snug whitespace-pre-line",
+                    isSelf
+                        ? "text-gray-800"
+                        : // : `text-${accentColor}-500 drop-shadow-${accentColor}`
+                          `text-${accentColor}-500`
+                )}
             >
                 {message}
             </div>
