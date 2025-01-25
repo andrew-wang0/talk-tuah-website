@@ -23,10 +23,12 @@ from livekit.agents.multimodal import MultimodalAgent
 
 from browser.controller import BrowserController
 
-bc = BrowserController()
-
 # first define a class that inherits from llm.FunctionContext
 class AssistantFnc(llm.FunctionContext):
+    def __init__(self):
+        super().__init__()
+        self.bc = BrowserController()
+
     # the llm.ai_callable decorator marks this function as a tool available to the LLM
     # by default, it'll use the docstring as the function's description
     @llm.ai_callable()
@@ -50,8 +52,8 @@ class AssistantFnc(llm.FunctionContext):
                     # response from the function call is returned to the LLM
                     # as a tool response. The LLM's response will include this data
                     
-                    await bc.get(website_url)
-                    TOC = await bc.table_of_contents()
+                    await self.bc.get(website_url)
+                    TOC = await self.bc.table_of_contents()
 
                     return f"The TOC of this {website_url} is {TOC}."
                 else:

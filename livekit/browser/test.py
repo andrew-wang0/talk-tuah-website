@@ -1,7 +1,7 @@
 import asyncio
 import time
 
-from browser.controller import BrowserController
+from .controller import BrowserController
 
 async def main():
     controller = BrowserController()
