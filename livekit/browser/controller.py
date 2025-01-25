@@ -1,7 +1,7 @@
 import base64
 import io
 import re
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment
 import lxml
 from PIL import Image
 
@@ -45,19 +45,27 @@ class BrowserController:
         self.headless_driver.set_window_size(1920, total_height)
 
     def html(self):
-        html =  self.headless_driver.page_source
-        html = re.sub(r'<script.*?</script>', '', html, flags=re.DOTALL)
-        html = re.sub(r'<style.*?</style>', '', html, flags=re.DOTALL)
-        html = re.sub(r'<link.*?/>', '', html, flags=re.DOTALL)
-        html = re.sub(r'<!--.*?-->', '', html, flags=re.DOTALL)
+        html_content = self.headless_driver.page_source
 
-        soup = BeautifulSoup(html, 'lxml')
-        html = soup.prettify()
+        soup = BeautifulSoup(html_content, 'lxml')
 
-        with open("./tmp/html.html", "w") as file:
-            file.write(html)
+        for tag in soup(['script', 'style', 'link', 'svg']):
+            tag.decompose()
 
-        return html
+        for comment in soup.find_all(string=lambda text: isinstance(text, Comment)):
+            comment.extract()
+
+        for tag in soup.find_all(True):
+            if 'class' in tag.attrs:
+                del tag.attrs['class']
+
+        pretty_html = soup.prettify()
+
+        with open("./tmp/html.html", "w", encoding='utf-8') as file:
+            file.write(pretty_html)
+
+        # Return the prettified HTML
+        return pretty_html
 
     def screenshot(self, path: str = "./tmp/screenshot"):
         total_height = self.headless_driver.execute_script("return document.body.parentNode.scrollHeight")

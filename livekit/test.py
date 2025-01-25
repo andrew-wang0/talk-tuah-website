@@ -12,7 +12,5 @@ async def main():
     print(start - time.perf_counter())
     print(md)
 
-    input()
-
 if __name__ == "__main__":
     asyncio.run(main())
