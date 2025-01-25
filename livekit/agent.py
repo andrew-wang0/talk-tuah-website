@@ -29,10 +29,6 @@ class AssistantFnc(llm.FunctionContext):
         super().__init__()
         self.bc = None
 
-    def __init__(self):
-        super().__init__()
-        self.bc = None
-
     # the llm.ai_callable decorator marks this function as a tool available to the LLM
     # by default, it'll use the docstring as the function's description
     @llm.ai_callable()
