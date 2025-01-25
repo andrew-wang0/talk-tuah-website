@@ -1,3 +1,5 @@
+import asyncio
+import json
 import logging
 
 from dotenv import load_dotenv
@@ -86,6 +88,8 @@ async def entrypoint(ctx: JobContext):
     # Wait for the first participant to connect
     participant = await ctx.wait_for_participant()
     logger.info(f"starting voice assistant for participant {participant.identity}")
+    
+    llm = openai.LLM(model="gpt-4o-mini")
 
     # This project is configured to use Deepgram STT, OpenAI LLM and TTS plugins
     # Other great providers exist like Cartesia and ElevenLabs
@@ -94,13 +98,26 @@ async def entrypoint(ctx: JobContext):
     agent = VoicePipelineAgent(
         vad=ctx.proc.userdata["vad"],
         stt=deepgram.STT(),
-        llm=openai.LLM(model="gpt-4o-mini"),
+        llm=llm,
         tts=openai.TTS(),
         chat_ctx=initial_ctx,
         fnc_ctx=fnc_ctx,
     )
 
     agent.start(ctx.room, participant)
+    
+    @ctx.room.on("data_received")
+    def handle_chat(data_packet):
+        data_bytes = data_packet.data 
+        data_str = data_bytes.decode('utf-8') 
+        data_dict = json.loads(data_str)
+
+        msg = data_dict.get("message", "No message found")
+
+        chat_ctx = agent.chat_ctx.copy()
+        chat_ctx.append(role="user", text=msg)
+        stream = llm.chat(chat_ctx=chat_ctx)
+        asyncio.create_task(agent.say(stream))
 
     # The agent should be polite and greet the user when it joins :)
     await agent.say("Hey, how can I help you today?", allow_interruptions=True)
