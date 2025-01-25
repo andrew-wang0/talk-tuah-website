@@ -1,7 +1,19 @@
+import base64
+import io
+from PIL import Image
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from .gpt import LLM
+
+def image_to_base64(pil_image, format='JPEG'):
+    buffered = io.BytesIO()
+    pil_image.save(buffered, format=format)
+    image_bytes = buffered.getvalue()
+    encoded_image = base64.b64encode(image_bytes).decode('utf-8')
+    return encoded_image
+
 
 class BrowserController:
     def __init__(self):
@@ -32,11 +44,15 @@ class BrowserController:
     def html(self):
         return self.headless_driver.page_source
 
-    def screenshot(self, path: str = "./tmp/screenshot.png"):
+    def screenshot(self, path: str = "./tmp/screenshot"):
         total_height = self.headless_driver.execute_script("return document.body.parentNode.scrollHeight")
         self.headless_driver.set_window_size(1920, total_height)
-        self.headless_driver.save_screenshot(path)
-        base64_img = self.headless_driver.get_screenshot_as_base64()
+        self.headless_driver.save_screenshot(path + ".png")
+
+        img = Image.open(path + ".png")
+        img.save(path + ".jpg", "JPEG")
+        jpg = Image.open(path + ".jpg")
+        base64_img = image_to_base64(jpg)
 
         return base64_img
 
