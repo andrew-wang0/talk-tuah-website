@@ -77,6 +77,10 @@ class BrowserController:
                 truncated_text = text_node[:text_limit] + '...'
                 text_node.replace_with(truncated_text)
 
+        for tag in reversed(soup.find_all()):
+            if not tag.find(True) and not tag.get_text(strip=True):
+                tag.decompose()
+
         pretty_html = soup.prettify()
 
         with open(f"{self.tmp}/html.html", "w", encoding='utf-8') as file:
