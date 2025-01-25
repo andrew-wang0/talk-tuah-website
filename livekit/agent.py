@@ -33,7 +33,7 @@ class AssistantFnc(llm.FunctionContext):
     async def get_toc(
         self,
         # by using the Annotated type, arg description and type are available to the LLM
-        location: Annotated[
+        website_url: Annotated[
             str, llm.TypeInfo(description="URL of the website to get the Table of Contents")
         ],
     ):

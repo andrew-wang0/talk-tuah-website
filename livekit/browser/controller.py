@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from llm import LLM
+from .gpt import LLM
 
 class BrowserController:
     def __init__(self):
