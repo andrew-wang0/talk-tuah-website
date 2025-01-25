@@ -9,7 +9,7 @@ import os
 load_dotenv()
 
 class LLM:
-    def __init__(self, model: str = "gpt-4o-mini", send_message: Callable | None = None):
+    def __init__(self, model: str = "gpt-4o", send_message: Callable | None = None):
         self.model: str = model
         self.client: AsyncOpenAI = AsyncOpenAI()
         self.messages: List[ChatCompletionMessageParam] = []

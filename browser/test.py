@@ -1,12 +1,16 @@
 import asyncio
+import time
 
 from browser.controller import BrowserController
-from selenium.webdriver.common.by import By
 
 async def main():
     controller = BrowserController()
     controller.get("https://ics.uci.edu/")
-    print(await controller.table_of_contents())
+
+    start = time.perf_counter()
+    md = await controller.table_of_contents()
+    print(start - time.perf_counter())
+    print(md)
 
     input()
 

@@ -19,9 +19,15 @@ class BrowserController:
         self.headless_driver.quit()
         self.driver.quit()
 
+    def __del__(self):
+        self.headless_driver.quit()
+        self.driver.quit()
+
     def get(self, url: str):
         self.headless_driver.get(url)
         self.driver.get(url)
+        total_height = self.headless_driver.execute_script("return document.body.parentNode.scrollHeight")
+        self.headless_driver.set_window_size(1920, total_height)
 
     def html(self):
         return self.headless_driver.page_source
@@ -80,4 +86,8 @@ class BrowserController:
         llm = LLM()
         toc = await llm.table_of_contents(self.html(), img)
 
+        with open("./tmp/toc.md", "w") as file:
+            file.write(toc)
+
         return toc
+

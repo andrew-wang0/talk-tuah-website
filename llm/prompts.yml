@@ -5,3 +5,4 @@ TABLE_OF_CONTENTS: >
   You will be given raw html and a screenshot of the respective webpage.
   Respond with a markdown version of the website that is easily accessible.
   Use hashtags to denote the heading levels. Do not exclude any content from the original webpage.
+  Retain all images. Add alt text to the images if it is not present.
