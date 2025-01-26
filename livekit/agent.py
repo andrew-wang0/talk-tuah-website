@@ -37,29 +37,30 @@ class AssistantFnc(llm.FunctionContext):
             str, llm.TypeInfo(description="Retrieving and generating Table Of Contents and complete mark-down contents")
         ],
     ):
-        """Called when the user sends/ request a link."""
+        """Called when the user sends a link."""
         logger.info(f"generating info for {contents}")
 
         async with aiohttp.ClientSession() as session:
             async with session.get(contents) as response:
                 if response.status == 200:
                     content = await response.text()
-                    
+
                     if not self.bc:
                         self.bc = BrowserController()
-                    
-                    self.bc.get(contents)
-                    TOC = await self.bc.generate_table_of_contents()
 
-                    mainContent = await self.bc.generate_contents()
-                    return f"The TOC: {content} \n Complete Content: {mainContent}."
+                    self.bc.get_async(contents)
+                    TOC = self.bc.generate_table_of_contents()
+                    mainContent = self.bc.generate_contents()
+
+                    logger.info("Successfully generated TOC and main content.")
+                    return f"The TOC: {TOC}\nComplete Content: {mainContent}."
                 else:
-                    raise f"Failed to get data, status code: {response.status}"
+                    logger.error(f"Failed to get data, status code: {response.status}")
+                    raise Exception(f"Failed to get data, status code: {response.status}")
 
     @llm.ai_callable()
     async def get_toc(
         self,
-        # by using the Annotated type, arg description and type are available to the LLM
         website_url: Annotated[
             str, llm.TypeInfo(description="URL of the website to get the Table of Contents")
         ],
@@ -80,7 +81,7 @@ class AssistantFnc(llm.FunctionContext):
                         self.bc = BrowserController()
                     
                     self.bc.get(website_url)
-                    TOC = await self.bc.table_of_contents()
+                    TOC = self.bc.get_table_of_contents()
 
                     return f"The TOC of this {website_url} is {TOC}."
                 else:
@@ -88,23 +89,49 @@ class AssistantFnc(llm.FunctionContext):
                     raise Exception(f"An error occurred while fetching the TOC for {website_url}.")
                 
     @llm.ai_callable()
-    async def start_reading(
+    async def get_contents(
         self,
-        start: Annotated[
-            str, llm.TypeInfo(description="Start reading the content of the website")
+        content_url: Annotated[
+            str, llm.TypeInfo(description="Extracting contents from the webpage")
         ],
     ):
-        """Called when the user asks to read the contents."""
-        logger.info(f"reading the content from {start}")
-        
+        """Called when the user asks about the main contents of a website. This function will return the contents for the given website."""
+        logger.info(f"getting TOC for {content_url}")
 
         async with aiohttp.ClientSession() as session:
-            async with session.get(start) as response:
+            async with session.get(content_url) as response:
                 if response.status == 200:
-                    content = await response.text()
-                    return f"Content of the website: \n{content}"
+                    html_content = await response.text()
+
+                    if not self.bc:
+                        self.bc = BrowserController()
+                    
+                    self.bc.get(content_url)
+                    TOC = self.bc.get_contents()
+
+                    return f"Main contents: {content_url}."
                 else:
-                    raise f"Failed to get the content {response.status}"
+                    logger.error(f"Error fetching contents {response}")
+                    raise Exception(f"An error occurred while fetching the TOC for {content_url}.")
+                
+    # @llm.ai_callable()
+    # async def start_reading(
+    #     self,
+    #     start: Annotated[
+    #         str, llm.TypeInfo(description="Start reading the content of the website")
+    #     ],
+    # ):
+    #     """Called when the user asks to read the contents."""
+    #     logger.info(f"reading the content from {start}")
+        
+
+    #     async with aiohttp.ClientSession() as session:
+    #         async with session.get(start) as response:
+    #             if response.status == 200:
+    #                 content = await response.text()
+    #                 return f"Content of the website: \n{content}"
+    #             else:
+    #                 raise f"Failed to get the content {response.status}"
 
 fnc_ctx = AssistantFnc()
 
@@ -143,7 +170,7 @@ async def entrypoint(ctx: JobContext):
         tts=openai.TTS(),
         chat_ctx=initial_ctx,
         fnc_ctx=fnc_ctx,
-        max_nested_fnc_calls=5,
+        max_nested_fnc_calls=10,
         allow_interruptions=True,
     )
 
