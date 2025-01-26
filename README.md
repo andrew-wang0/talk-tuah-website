@@ -20,7 +20,7 @@
     <img src="https://img.shields.io/badge/LiveKit-FF595E?style=for-the-badge&logo=livekit&logoColor=white" alt="LiveKit">
     <img src="https://img.shields.io/badge/OpenAI-2E7D32?style=for-the-badge&logo=openai&logoColor=white" alt="OpenAI">
     <img src="https://img.shields.io/badge/Whisper-4CAF50?style=for-the-badge&logo=whisper&logoColor=white" alt="Whisper">
-    <img src="https://img.shields.io/badge/Koberos-FF9800?style=for-the-badge&logo=koberos&logoColor=white" alt="Koberos">
+    <img src="https://img.shields.io/badge/Kokoro-FF9800?style=for-the-badge&logo=koberos&logoColor=white" alt="Kokoro">
     <img src="https://img.shields.io/badge/Llama-Ollama-673AB7?style=for-the-badge&logo=llama&logoColor=white" alt="Llama (Ollama)">
 </p>
 
