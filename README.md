@@ -13,7 +13,7 @@
     <br>
     <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
     <img src="https://img.shields.io/badge/ChatGPT-74aa9c?style=for-the-badge&logo=openai&logoColor=white" alt="OpenAI">
-    <img src="https://img.shields.io/badge/Selenium-9945FF?style=for-the-badge&logo=selenium&logoColor=white" alt="Selenium">
+    <img src="https://img.shields.io/badge/Selenium-43B02A?style=for-the-badge&logo=Selenium&logoColor=white" alt="Selenium">
     <br> <br>
     <strong>Conversational AI built with:</strong>
     <br>
