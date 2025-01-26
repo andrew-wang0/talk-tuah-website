@@ -30,9 +30,32 @@ class AssistantFnc(llm.FunctionContext):
         super().__init__()
         self.bc = None
 
+    @llm.ai_callable()
+    async def get_toc_contents(
+        self,
+        contents: Annotated[
+            str, llm.TypeInfo(description="Retrieving and generating Table Of Contents and complete mark-down contents")
+        ],
+    ):
+        """Called when the user sends/ request a link."""
+        logger.info(f"generating info for {contents}")
 
-    # the llm.ai_callable decorator marks this function as a tool available to the LLM
-    # by default, it'll use the docstring as the function's description
+        async with aiohttp.ClientSession() as session:
+            async with session.get(contents) as response:
+                if response.status == 200:
+                    content = await response.text()
+                    
+                    if not self.bc:
+                        self.bc = BrowserController()
+                    
+                    self.bc.get(contents)
+                    TOC = await self.bc.generate_table_of_contents()
+
+                    mainContent = await self.bc.generate_contents()
+                    return f"The TOC: {content} \n Complete Content: {mainContent}."
+                else:
+                    raise f"Failed to get data, status code: {response.status}"
+
     @llm.ai_callable()
     async def get_toc(
         self,
