@@ -9,6 +9,6 @@
 
 <p align="center">
     <a href="#">
-        <img width="1728" alt="Splash" src="#">
+        <img width="1728" alt="TalkTuahWeb" src="https://github.com/andrew-wang0/ai-screen-reader/blob/main/TalkTuahWeb.png">
     </a>
 </p>
