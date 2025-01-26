@@ -31,29 +31,28 @@ class AssistantFnc(llm.FunctionContext):
         self.bc = None
 
     @llm.ai_callable()
-    async def get_toc_contents(
+    async def navigate_url(
         self,
-        contents: Annotated[
-            str, llm.TypeInfo(description="Retrieving and generating Table Of Contents and complete mark-down contents")
+        page: Annotated[
+            str, llm.TypeInfo(description="Navigating to the URL and generating Table Of Contents and complete mark-down contents")
         ],
     ):
         """Called when the user sends a link."""
-        logger.info(f"generating info for {contents}")
+        logger.info(f"generating info for {page}")
 
         async with aiohttp.ClientSession() as session:
-            async with session.get(contents) as response:
+            async with session.get(page) as response:
                 if response.status == 200:
-                    content = await response.text()
 
                     if not self.bc:
                         self.bc = BrowserController()
 
-                    self.bc.get_async(contents)
-                    TOC = self.bc.generate_table_of_contents()
+                    self.bc.get(page)
+                    toc = self.bc.generate_table_of_contents()
                     mainContent = self.bc.generate_contents()
 
                     logger.info("Successfully generated TOC and main content.")
-                    return f"The TOC: {TOC}\nComplete Content: {mainContent}."
+                    return f"The TOC: {toc} \n Complete Content: {mainContent}."
                 else:
                     logger.error(f"Failed to get data, status code: {response.status}")
                     raise Exception(f"Failed to get data, status code: {response.status}")
@@ -78,10 +77,9 @@ class AssistantFnc(llm.FunctionContext):
                     if not self.bc:
                         self.bc = BrowserController()
                     
-                    self.bc.get(website_url)
-                    TOC = self.bc.get_table_of_contents()
+                    toc = self.bc.get_table_of_contents()
 
-                    return f"The TOC of this {website_url} is {TOC}."
+                    return f"The TOC of this {website_url} is {toc}."
                 else:
                     logger.error(f"Error fetching TOC for {website_url}: {response}")
                     raise Exception(f"An error occurred while fetching the TOC for {website_url}.")
@@ -102,7 +100,6 @@ class AssistantFnc(llm.FunctionContext):
                     if not self.bc:
                         self.bc = BrowserController()
                     
-                    self.bc.get(content_url)
                     contents = self.bc.get_contents()
 
                     return f"Main contents: {contents}."
