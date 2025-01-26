@@ -22,7 +22,7 @@ load_dotenv(dotenv_path=".env.local")
 logger = logging.getLogger("voice-agent")
 
 import aiohttp
-from typing import Annotated, AsyncIterable
+from typing import Annotated, AsyncIterable, Union
 
 from livekit.agents.multimodal import MultimodalAgent
 
@@ -35,32 +35,126 @@ prompts_path = os.path.join(os.path.dirname(__file__), "prompts.yml")
 with open(prompts_path, "r") as file:
     prompts = yaml.safe_load(file)
 
-async def scroll_to(assistant: VoicePipelineAgent, text: str | AsyncIterable[str]):
+# async def scroll_to(assistant: VoicePipelineAgent, text: str | AsyncIterable[str]):
+#     global bc
+#
+#     substring = "[[CONTENT]]"
+#
+#     print("[[SCROLL_TO]] ATTEMPTING SCROLL")
+#
+#     print("[[SCROLL_TO]] TEXT TYPE", type(text))
+#
+#     try:
+#         if isinstance(text, AsyncIterable):
+#             # Gather the async generator into a single string
+#             text = ''.join([chunk async for chunk in text])
+#         else:
+#             raise TypeError("Unsupported text type; expected str or AsyncIterable[str]")
+#
+#         print("[[SCROLL_TO]] TEXT", text)
+#         # Find the substring and generate the XPath
+#         index = text.find(substring) + len(substring) + 2  # Account for substring length, empty string, and start quote: ' "'
+#         search = text[index:index+20]
+#         print("[[SCROLL_TO]] SEARCH", search)
+#         xpath = f"//*[contains(normalize-space(text()), '{search}')]"
+#
+#         print("[[SCROLL_TO]] SCROLLING TO", xpath)
+#
+#         # Scroll to the element using XPath
+#         bc.scroll_to(by=By.XPATH, value=xpath)
+#     except Exception as e:
+#         print("[[SCROLL_TO]] ERROR:", e)
+#     finally:
+#         return text
+import asyncio
+import logging
+from typing import AsyncIterable, Union
+from selenium.webdriver.common.by import By
+
+logger = logging.getLogger("voice-agent")
+
+
+async def scroll_to(assistant, text: Union[str, AsyncIterable[str]]):
+    """
+    A before_tts_cb that:
+      1. If `text` is a string, immediately does substring logic.
+      2. If `text` is an async generator, handles multiple calls:
+         - If it produces 0 chunks, we skip scrolling (often the first call).
+         - Otherwise, we wait for a few chunks, do substring logic,
+           then re-yield them all for TTS to speak.
+    """
     global bc
-    
+
     substring = "[[CONTENT]]"
-    
+
     print("[[SCROLL_TO]] ATTEMPTING SCROLL")
-    
-    try:
-        if isinstance(text, AsyncIterable):
-            # Gather the async generator into a single string
-            text = ''.join([chunk async for chunk in text])
-        else:
-            raise TypeError("Unsupported text type; expected str or AsyncIterable[str]")    
-        
-        # Find the substring and generate the XPath
-        index = text.find(substring) + len(substring) + 2  # Account for substring length, empty string, and start quote: ' "'
-        search = text[index:index+20]
-        print("[[SCROLL_TO]] SEARCH", search)
-        xpath = f"//*[contains(text(), '{search}')]"
-        
-        # Scroll to the element using XPath
-        bc.scroll_to(by=By.XPATH, value=xpath)
-    except Exception as e:
-        print("[[SCROLL_TO]] ERROR:", e)
-    finally:
-        return text
+    print("[[SCROLL_TO]] TEXT TYPE", type(text))
+
+    # ----- Case 1: Already a plain string -----
+    if isinstance(text, str):
+        print("[[SCROLL_TO]] Received a string of length:", len(text))
+        try:
+            index = text.find(substring)
+            if index != -1:
+                index += len(substring) + 2
+                search = text[index: index + 20]
+                xpath = f"//*[contains(normalize-space(text()), '{search}')]"
+                print("[[SCROLL_TO]] SCROLLING TO:", xpath)
+                bc.scroll_to(by=By.XPATH, value=xpath)
+            else:
+                print("[[SCROLL_TO]] Substring not found.")
+        except Exception as e:
+            print("[[SCROLL_TO]] ERROR (string mode):", e)
+        finally:
+            return text  # Return original string for TTS
+
+    # ----- Case 2: text is an async generator -----
+    if isinstance(text, AsyncIterable):
+        consumed_chunks = []
+        chunk_counter = 0
+        scroll_done = False
+
+        async def wrapped_generator():
+            nonlocal consumed_chunks, chunk_counter, scroll_done
+
+            async for chunk in text:
+                if scroll_done:
+                    pass
+                # Record that we got a chunk (even if it's empty string).
+                chunk_counter += 1
+                print(f"[[SCROLL_TO]] Got chunk #{chunk_counter}: {repr(chunk)}")
+
+                # Accumulate chunk
+                consumed_chunks.append(chunk)
+
+                # Build partial text so far
+                partial_text = "".join(consumed_chunks)
+                print("[[SCROLL_TO]] partial_text so far:", partial_text)
+
+                # After a few chunks, try to scroll once
+                if not scroll_done:
+                    try:
+                        index = partial_text.find(substring)
+                        if index != -1 and len(partial_text[index:]) > 20:
+                            index += len(substring) + 2
+                            search = partial_text[index: index + 20]
+                            xpath = f"//*[contains(normalize-space(text()), '{search}')]"
+                            print("[[SCROLL_TO]] SCROLLING TO:", xpath)
+                            bc.scroll_to(by=By.XPATH, value=xpath)
+                            scroll_done = True
+
+                        else:
+                            print("[[SCROLL_TO]] Substring not found in partial text.")
+                    except Exception as e:
+                        print("[[SCROLL_TO]] ERROR (generator partial):", e)
+
+                # Yield each chunk so TTS can speak it in real time
+                yield chunk
+
+        return wrapped_generator()
+
+    # If here, we got an unexpected type
+    raise TypeError("Unsupported text type; expected str or AsyncIterable[str]")
     
 class AssistantFnc(llm.FunctionContext):
     global bc

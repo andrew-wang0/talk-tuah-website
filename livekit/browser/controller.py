@@ -108,23 +108,23 @@ class BrowserController:
 
         return base64_img
 
-    def scroll_to(self, by: By, value: str):
+    def scroll_to(self, by: By, value: str, highlight: bool = True):
         scroll = "arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center' });"
 
-        element = self.headless_driver.find_element(by, value)
-        
-        if not element:
+        try:
+            element = self.driver.find_element(by, value)
+        except:
             print("[[SCROLL_TO]] ELEMENT NOT FOUND")
             return
-        
-        
         print("[[SCROLL_TO]] ELEMENT FOUND")
 
-        self.driver.execute_script("arguments[0].style.backgroundColor = 'red';", element)
-        self.headless_driver.execute_script(scroll, element)
 
-        element = self.driver.find_element(by, value)
+        print(f"[[SCROLL_TO]] SCROLLING TO {element}")
         self.driver.execute_script(scroll, element)
+
+        if highlight:
+            self.driver.execute_script("arguments[0].style.backgroundColor = 'yellow';", element)
+
 
     def scroll_up(self, pixels: int = 500):
         scroll_script = f"window.scrollBy({{ top: -{pixels}, left: 0, behavior: 'smooth' }});"
