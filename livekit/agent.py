@@ -15,7 +15,7 @@ from livekit.agents import (
     tokenize
 )
 from livekit.agents.pipeline import VoicePipelineAgent
-from livekit.plugins import openai, deepgram, silero
+from livekit.plugins import openai, deepgram, silero, google
 from selenium.webdriver.common.by import By
 
 load_dotenv(dotenv_path=".env.local")
@@ -163,9 +163,9 @@ async def entrypoint(ctx: JobContext):
     # https://docs.livekit.io/agents/plugins
     agent = VoicePipelineAgent(
         vad=ctx.proc.userdata["vad"],
-        stt=deepgram.STT(),
-        llm=oai,
-        tts=openai.TTS(),
+        stt=google.STT(),
+        llm=google.LLM(),
+        tts=google.TTS(),
         chat_ctx=initial_ctx,
         fnc_ctx=fnc_ctx,
         max_nested_fnc_calls=10,
