@@ -388,7 +388,7 @@ export default function Playground({
         content: (
             <PlaygroundTile
                 padding={false}
-                backgroundColor="gray-950"
+                backgroundColor="gray-200"
                 className="h-full w-full basis-1/4 items-start overflow-y-auto flex"
                 childrenClassName="h-full grow items-start"
             >
@@ -414,14 +414,14 @@ export default function Playground({
                 className={`flex gap-4 py-4 grow w-full selection:bg-${config.settings.theme_color}-900`}
                 style={{ height: `calc(100% - ${headerHeight}px)` }}
             >
-                <div className="flex flex-col grow basis-1/2 gap-4 h-full lg:hidden">
+                <div className="flex flex-col grow basis-1/2 gap-4 h-full md:hidden">
                     <PlaygroundTabbedTile
                         className="h-full"
                         tabs={mobileTabs}
                         initialTab={mobileTabs.length - 1}
                     />
                 </div>
-                <div
+                {/* <div
                     className={`flex-col grow basis-1/2 gap-4 h-full hidden lg:${
                         !config.settings.outputs.audio &&
                         !config.settings.outputs.video
@@ -434,7 +434,7 @@ export default function Playground({
                         className="w-full h-full grow"
                         childrenClassName="justify-center"
                     />
-                    {/* {config.settings.outputs.video && (
+                    {config.settings.outputs.video && (
                         <PlaygroundTile
                             title="Video"
                             className="w-full h-full grow"
@@ -442,8 +442,8 @@ export default function Playground({
                         >
                             {videoTileContent}
                         </PlaygroundTile>
-                    )} */}
-                    {/* {config.settings.outputs.audio && (
+                    )}
+                    {config.settings.outputs.audio && (
                         <PlaygroundTile
                             title="Audio"
                             className="w-full h-full grow"
@@ -451,13 +451,13 @@ export default function Playground({
                         >
                             {audioTileContent}
                         </PlaygroundTile>
-                    )} */}
-                </div>
+                    )}
+                </div> */}
 
                 {config.settings.chat && (
                     <PlaygroundTile
                         title="Chat"
-                        className="h-full grow basis-1/4 hidden lg:flex"
+                        className="h-full grow basis-1/4 hidden md:flex"
                     >
                         {chatTileContent}
                     </PlaygroundTile>
@@ -465,7 +465,7 @@ export default function Playground({
                 <PlaygroundTile
                     padding={false}
                     // backgroundColor="gray-950"
-                    className="h-full w-full basis-1/4 items-start overflow-y-auto hidden max-w-[480px] lg:flex"
+                    className="h-full w-full basis-1/3 items-start overflow-y-auto hidden max-w-[480px] md:flex"
                     childrenClassName="h-full grow items-start"
                 >
                     {settingsTileContent}

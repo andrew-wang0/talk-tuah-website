@@ -9,7 +9,6 @@ from selenium.webdriver.common.by import By
 from .gpt import LLM
 from pathlib import Path
 
-
 def image_to_base64(pil_image, format='JPEG'):
     buffered = io.BytesIO()
     pil_image.save(buffered, format=format)
@@ -42,9 +41,10 @@ class BrowserController:
         self.headless_driver = webdriver.Chrome(options=headless_options)
 
         options = Options()
-        options.add_argument("--window-size=1920,1080")
+        options.add_argument("--window-size=860,1080")
+        options.add_argument(f"--window-position={0},{0}")
         self.driver = webdriver.Chrome(options=options)
-
+        
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.headless_driver.quit()
         self.driver.quit()
@@ -112,6 +112,15 @@ class BrowserController:
         scroll = "arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center' });"
 
         element = self.headless_driver.find_element(by, value)
+        
+        if not element:
+            print("[[SCROLL_TO]] ELEMENT NOT FOUND")
+            return
+        
+        
+        print("[[SCROLL_TO]] ELEMENT FOUND")
+
+        self.driver.execute_script("arguments[0].style.backgroundColor = 'red';", element)
         self.headless_driver.execute_script(scroll, element)
 
         element = self.driver.find_element(by, value)

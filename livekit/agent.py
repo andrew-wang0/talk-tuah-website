@@ -1,6 +1,8 @@
 import asyncio
 import json
 import logging
+import os
+import yaml
 
 from dotenv import load_dotenv
 from livekit.agents import (
@@ -9,26 +11,47 @@ from livekit.agents import (
     JobProcess,
     WorkerOptions,
     cli,
+    llm,
 )
 from livekit.agents.pipeline import VoicePipelineAgent
 from livekit.plugins import openai, deepgram, silero
+from selenium.webdriver.common.by import By
 
 load_dotenv(dotenv_path=".env.local")
 logger = logging.getLogger("voice-agent")
 
 import aiohttp
-from typing import Annotated
+from typing import Annotated, AsyncIterable
 
-from livekit.agents import llm
 from livekit.agents.multimodal import MultimodalAgent
 
 from browser.controller import BrowserController
 
-# first define a class that inherits from llm.FunctionContext
+PAGE: str = "larc.uci.edu"
+bc = BrowserController()
+
+prompts_path = os.path.join(os.path.dirname(__file__), "prompts.yml")
+with open(prompts_path, "r") as file:
+    prompts = yaml.safe_load(file)
+
+def scroll_to(assistant: VoicePipelineAgent, text: str | AsyncIterable[str]):
+    global bc
+    
+    print("[[SCROLL_TO]] ATTEMPTING SCROLL")
+
+    try:
+        xpath = f"//*[contains(text(), '{text}')]"
+        bc.scroll_to(by=By.XPATH, value=xpath)
+    except Exception as e:
+        print("[[SCROLL_TO]] ERROR:", e)
+    finally:
+        return text
+    
 class AssistantFnc(llm.FunctionContext):
+    global bc
+    
     def __init__(self):
         super().__init__()
-        self.bc = None
 
     @llm.ai_callable()
     async def navigate_url(
@@ -43,15 +66,15 @@ class AssistantFnc(llm.FunctionContext):
         async with aiohttp.ClientSession() as session:
             async with session.get(page) as response:
                 if response.status == 200:
-
-                    if not self.bc:
-                        self.bc = BrowserController()
-
-                    self.bc.get(page)
-                    # toc = await self.bc.generate_table_of_contents()
-                    # mainContent = await self.bc.generate_contents()
+                    bc.get(page)
+                    # toc = await bc.generate_table_of_contents()
+                    # mainContent = await bc.generate_contents()
+                    
+                    global PAGE
+                    PAGE = page
 
                     logger.info("Successfully generated TOC and main content.")
+                    return("CONFIRM TO THE USER THAT YOU ARE DONE.")
                     # return f"The TOC: {toc} \n Complete Content: {mainContent}."
                 else:
                     logger.error(f"Failed to get data, status code: {response.status}")
@@ -60,75 +83,44 @@ class AssistantFnc(llm.FunctionContext):
     @llm.ai_callable()
     async def get_toc(
         self,
-        website_url: Annotated[
-            str, llm.TypeInfo(description="URL of the website to get the Table of Contents")
-        ],
     ):
         """
-        Called when the user asks about the table of contents of a website. This function will return the table of content for the given website.
-        Read only the top-level headings. Do not read addition sub-headings unless requested.
-        DO NOT READ ADDITIONAL SUB BULLETS. ONLY READ HIGH LEVEL H1 (#), H2 (##) TAGS.
         """
-        logger.info(f"getting TOC for {website_url}")
+        logger.info(f"getting TOC")
+        
+        global PAGE
+        if not PAGE:
+            return "Page not set. What page do you want to navigate to?"
 
-        if not website_url.startswith(("http://", "https://")):
-            website_url = "http://" + website_url
-            logger.debug(f"Updated website URL to: {website_url}")
+        try:            
+            toc = bc.get_table_of_contents()
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(website_url) as response:
-                if response.status == 200:
-                    if not self.bc:
-                        self.bc = BrowserController()
-                    
-                    toc = self.bc.get_table_of_contents()
-
-                    return f"The TOC of this {website_url} is {toc}."
-                else:
-                    logger.error(f"Error fetching TOC for {website_url}: {response}")
-                    raise Exception(f"An error occurred while fetching the TOC for {website_url}.")
+            return f"The TOC is {toc}."
+        except:
+            logger.error(f"Error fetching TOC")
+            raise Exception(f"An error occurred while fetching the TOC.")
+    
+    get_toc.__doc__ = prompts["TABLE_OF_CONTENTS"]
                 
     @llm.ai_callable()
     async def get_contents(
         self,
-        content_url: Annotated[
-            str, llm.TypeInfo(description="Extracting contents from the webpage")
-        ],
     ):
         """Called when the user asks about the main contents of a website. This function will return the contents for the given website."""
-        logger.info(f"getting TOC for {content_url}")
-
-        async with aiohttp.ClientSession() as session:
-            async with session.get(content_url) as response:
-                if response.status == 200:
-                    if not self.bc:
-                        self.bc = BrowserController()
-                    
-                    contents = self.bc.get_contents()
-
-                    return f"Main contents: {contents}."
-                else:
-                    logger.error(f"Error fetching contents {response}")
-                    raise Exception(f"An error occurred while fetching the TOC for {content_url}.")
-                
-    # @llm.ai_callable()
-    # async def start_reading(
-    #     self,
-    #     start: Annotated[
-    #         str, llm.TypeInfo(description="Start reading the content of the website")
-    #     ],
-    # ):
-    #     """Called when the user asks to read the contents."""
-    #     logger.info(f"reading the content from {start}")
+        logger.info(f"getting page contents")
         
+        global PAGE
+        if not PAGE:
+            return "Page not set. What page do you want to navigate to?"
 
-    #     async with aiohttp.ClientSession() as session:
-    #         async with session.get(start) as response:
-    #             if response.status == 200:
-    #                 content = await response.text()
-    #                 return f"Content of the website: \n{content}"
-    #             else:
-    #                 raise f"Failed to get the content {response.status}"
+        try:            
+            contents = bc.get_contents()
+            
+            return f"Page contents: {contents}."
+        except:
+            logger.error(f"Error fetching contents")
+            raise Exception(f"An error occurred while fetching the contents.")
+        
 
 fnc_ctx = AssistantFnc()
 
@@ -136,17 +128,9 @@ def prewarm(proc: JobProcess):
     proc.userdata["vad"] = silero.VAD.load()
 
 async def entrypoint(ctx: JobContext):
-    from livekit.agents import llm
-
     initial_ctx = llm.ChatContext().append(
         role="system",
-        text=(
-            "You are a voice assistant created by LiveKit. Your interface with users will be voice. "
-            "You should use short and concise responses, and avoiding usage of unpronouncable punctuation. "
-            "You are a visual, textual, and auditory agent built to emulate a screen reader. Responses should be concise and exact to the user's request. "
-            "EMULATE in your messages a screen reader. Offer helpful, extremely concise (spartan) context at the beginning of a message (e.g. 6 testimonials: 1. foobar) "
-            "DO NOT TRUNCATE THE TEXT FROM THE CONTENT YOU'RE READING. STATE THEM IN FULL. ADDITIONAL CONTENT __THE AGENT__ (you) add should be concise."
-        ),
+        text=(prompts["SYSTEM"]),
     )
 
     logger.info(f"connecting to room {ctx.room.name}")
@@ -171,6 +155,7 @@ async def entrypoint(ctx: JobContext):
         fnc_ctx=fnc_ctx,
         max_nested_fnc_calls=10,
         allow_interruptions=True,
+        # before_tts_cb=scroll_to,
     )
 
     agent.start(ctx.room, participant)
@@ -183,6 +168,7 @@ async def entrypoint(ctx: JobContext):
 
         msg = data_dict.get("message", "No message found")
 
+        agent.interrupt()
         chat_ctx = agent.chat_ctx.copy()
         chat_ctx.append(role="user", text=msg)
         stream = oai.chat(chat_ctx=chat_ctx, fnc_ctx=fnc_ctx)

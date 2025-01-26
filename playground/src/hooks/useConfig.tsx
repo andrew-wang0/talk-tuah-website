@@ -37,14 +37,14 @@ export type UserSettings = {
 };
 
 // Fallback if NEXT_PUBLIC_APP_CONFIG is not set
-// we're commenting out next_public_app_config <- kevin
+// we're commenting out next_public_app_config, so this is ALWAYS used <- kevin
 const defaultConfig: AppConfig = {
-    title: "AI Screen Reader",
+    title: "TalkTuahWebsite",
     description: "A playground for testing LiveKit Agents",
     video_fit: "cover",
     settings: {
         editable: true,
-        theme_color: "green",
+        theme_color: "blue",
         chat: true,
         inputs: {
             camera: true,

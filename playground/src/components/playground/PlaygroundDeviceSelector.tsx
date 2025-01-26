@@ -41,7 +41,7 @@ export const PlaygroundDeviceSelector = ({
                     e.stopPropagation();
                 }}
             >
-                <span className="max-w-[80px] overflow-ellipsis overflow-hidden whitespace-nowrap">
+                <span className="max-w-[50px] overflow-ellipsis overflow-hidden whitespace-nowrap">
                     {selectedDeviceName}
                 </span>
                 <ChevronSVG />
