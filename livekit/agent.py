@@ -15,7 +15,7 @@ from livekit.agents import (
     tokenize
 )
 from livekit.agents.pipeline import VoicePipelineAgent
-from livekit.plugins import openai, deepgram, silero, google
+from livekit.plugins import openai, deepgram, silero
 from selenium.webdriver.common.by import By
 
 load_dotenv(dotenv_path=".env.local")
