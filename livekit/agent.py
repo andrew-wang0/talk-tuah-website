@@ -27,6 +27,7 @@ from livekit.agents.multimodal import MultimodalAgent
 
 from browser.controller import BrowserController
 
+<<<<<<< Updated upstream
 PAGE: str = "larc.uci.edu"
 bc = BrowserController()
 
@@ -47,6 +48,8 @@ def scroll_to(assistant: VoicePipelineAgent, text: str | AsyncIterable[str]):
     finally:
         return text
     
+=======
+>>>>>>> Stashed changes
 class AssistantFnc(llm.FunctionContext):
     global bc
     
@@ -136,7 +139,6 @@ async def entrypoint(ctx: JobContext):
     logger.info(f"connecting to room {ctx.room.name}")
     await ctx.connect(auto_subscribe=AutoSubscribe.AUDIO_ONLY)
 
-    # Wait for the first participant to connect
     participant = await ctx.wait_for_participant()
     logger.info(f"starting voice assistant for participant {participant.identity}")
     
@@ -174,7 +176,6 @@ async def entrypoint(ctx: JobContext):
         stream = oai.chat(chat_ctx=chat_ctx, fnc_ctx=fnc_ctx)
         asyncio.create_task(agent.say(stream))
 
-    # The agent should be polite and greet the user when it joins :)
     await agent.say("Hey, how can I help you today?", allow_interruptions=True)
 
 
