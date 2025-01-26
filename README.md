@@ -1,5 +1,4 @@
 # [TalkTuahWebsite](https://devpost.com/software/talktuahwebsite)
-
 ### Building a Conversational, Accessible Web
 
 ### Tech stack
@@ -11,7 +10,7 @@
     <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js">
     <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">
     <img src="https://img.shields.io/badge/shadcn-000000?style=for-the-badge&logo=shadcnui&logoColor=white" alt="Shadcn">
-    <br>
+    <br> <br>
     <strong>Backend built with:</strong>
     <br>
     <img src="https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E" alt="JavaScript">
@@ -21,7 +20,7 @@
     <img src="https://img.shields.io/badge/FFmpeg-007808?style=for-the-badge&logo=FFmpeg&logoColor=white" alt="FFmpeg">
     <img src="https://img.shields.io/badge/Solana-9945FF?style=for-the-badge&logo=Solana&logoColor=white" alt="Solana">
     <img src="https://img.shields.io/badge/IPFS-65C2CB?style=for-the-badge&logo=IPFS&logoColor=white" alt="IPFS">
-    <br>
+    <br> <br>
     <strong>Conversational AI built with:</strong>
     <br>
     <img src="https://img.shields.io/badge/LiveKit-FF595E?style=for-the-badge&logo=livekit&logoColor=white" alt="LiveKit">
