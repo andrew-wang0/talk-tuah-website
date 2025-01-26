@@ -161,11 +161,23 @@ async def entrypoint(ctx: JobContext):
     # Other great providers exist like Cartesia and ElevenLabs
     # Learn more and pick the best one for your app:
     # https://docs.livekit.io/agents/plugins
+    # agent = VoicePipelineAgent(
+    #     vad=ctx.proc.userdata["vad"],
+    #     stt=google.STT(),
+    #     llm=google.LLM(),
+    #     tts=google.TTS(),
+    #     chat_ctx=initial_ctx,
+    #     fnc_ctx=fnc_ctx,
+    #     max_nested_fnc_calls=10,
+    #     allow_interruptions=True,
+    #     before_tts_cb=scroll_to,
+    # )
+
     agent = VoicePipelineAgent(
         vad=ctx.proc.userdata["vad"],
-        stt=google.STT(),
-        llm=google.LLM(),
-        tts=google.TTS(),
+        stt=deepgram.STT(),
+        llm=oai,
+        tts=openai.TTS(),
         chat_ctx=initial_ctx,
         fnc_ctx=fnc_ctx,
         max_nested_fnc_calls=10,
