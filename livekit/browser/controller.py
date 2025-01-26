@@ -20,10 +20,15 @@ def image_to_base64(pil_image, format='JPEG'):
 
 def find_tmp_folder():
     current_dir = Path.cwd()
-    tmp_folders = list(current_dir.rglob('tmp'))  # rglob searches recursively
+    tmp_folders = list(current_dir.rglob('tmp')) 
     tmp_folders = [folder.resolve() for folder in tmp_folders if folder.is_dir()]
-
-    return str(tmp_folders[0])
+    
+    if tmp_folders:
+        return str(tmp_folders[0])
+    else:
+        tmp_folder = current_dir / 'tmp'
+        tmp_folder.mkdir(parents=True, exist_ok=True)
+        return str(tmp_folder)
 
 
 class BrowserController:
@@ -151,6 +156,8 @@ class BrowserController:
 
         with open(f"{self.tmp}/toc.md", "w") as file:
             file.write(toc)
+        
+        print("[[LOG]]:", "Generated TOC")
 
         return toc
 
@@ -165,6 +172,8 @@ class BrowserController:
 
         with open(f"{self.tmp}/contents.md", "w") as file:
             file.write(toc)
+
+        print("[[LOG]]:", "Generated Contents")
 
         return toc
 

@@ -176,7 +176,7 @@ export default function Playground({
 
         const visualizerContent = (
             <div
-                className={`flex items-center justify-center w-full h-48 [--lk-va-bar-width:30px] [--lk-va-bar-gap:20px] [--lk-fg:var(--lk-theme-color)]`}
+                className={`flex items-center justify-center w-full h-24 [--lk-va-bar-width:30px] [--lk-va-bar-gap:20px] [--lk-fg:var(--lk-theme-color)]`}
             >
                 <BarVisualizer
                     state={voiceAssistant.state}

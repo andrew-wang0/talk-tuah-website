@@ -48,11 +48,11 @@ class AssistantFnc(llm.FunctionContext):
                         self.bc = BrowserController()
 
                     self.bc.get(page)
-                    toc = self.bc.generate_table_of_contents()
-                    mainContent = self.bc.generate_contents()
+                    # toc = await self.bc.generate_table_of_contents()
+                    # mainContent = await self.bc.generate_contents()
 
                     logger.info("Successfully generated TOC and main content.")
-                    return f"The TOC: {toc} \n Complete Content: {mainContent}."
+                    # return f"The TOC: {toc} \n Complete Content: {mainContent}."
                 else:
                     logger.error(f"Failed to get data, status code: {response.status}")
                     raise Exception(f"Failed to get data, status code: {response.status}")
@@ -64,7 +64,11 @@ class AssistantFnc(llm.FunctionContext):
             str, llm.TypeInfo(description="URL of the website to get the Table of Contents")
         ],
     ):
-        """Called when the user asks about the table of contents of a website. This function will return the table of content for the given website."""
+        """
+        Called when the user asks about the table of contents of a website. This function will return the table of content for the given website.
+        Read only the top-level headings. Do not read addition sub-headings unless requested.
+        DO NOT READ ADDITIONAL SUB BULLETS. ONLY READ HIGH LEVEL H1 (#), H2 (##) TAGS.
+        """
         logger.info(f"getting TOC for {website_url}")
 
         if not website_url.startswith(("http://", "https://")):
@@ -139,7 +143,9 @@ async def entrypoint(ctx: JobContext):
         text=(
             "You are a voice assistant created by LiveKit. Your interface with users will be voice. "
             "You should use short and concise responses, and avoiding usage of unpronouncable punctuation. "
-            "You were created as a demo to showcase the capabilities of LiveKit's agents framework."
+            "You are a visual, textual, and auditory agent built to emulate a screen reader. Responses should be concise and exact to the user's request. "
+            "EMULATE in your messages a screen reader. Offer helpful, extremely concise (spartan) context at the beginning of a message (e.g. 6 testimonials: 1. foobar) "
+            "DO NOT TRUNCATE THE TEXT FROM THE CONTENT YOU'RE READING. STATE THEM IN FULL. ADDITIONAL CONTENT __THE AGENT__ (you) add should be concise."
         ),
     )
 

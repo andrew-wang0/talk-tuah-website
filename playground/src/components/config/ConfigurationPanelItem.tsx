@@ -27,6 +27,7 @@ export const ConfigurationPanelItem: React.FC<ConfigurationPanelItemProps> = ({
                                     ? Track.Source.Microphone
                                     : Track.Source.Camera
                             }
+                            initialState={false}
                         />
                         <PlaygroundDeviceSelector kind={deviceSelectorKind} />
                     </span>
