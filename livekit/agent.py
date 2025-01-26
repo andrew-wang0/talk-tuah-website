@@ -12,6 +12,7 @@ from livekit.agents import (
     WorkerOptions,
     cli,
     llm,
+    tokenize
 )
 from livekit.agents.pipeline import VoicePipelineAgent
 from livekit.plugins import openai, deepgram, silero
@@ -27,7 +28,6 @@ from livekit.agents.multimodal import MultimodalAgent
 
 from browser.controller import BrowserController
 
-<<<<<<< Updated upstream
 PAGE: str = "larc.uci.edu"
 bc = BrowserController()
 
@@ -35,21 +35,33 @@ prompts_path = os.path.join(os.path.dirname(__file__), "prompts.yml")
 with open(prompts_path, "r") as file:
     prompts = yaml.safe_load(file)
 
-def scroll_to(assistant: VoicePipelineAgent, text: str | AsyncIterable[str]):
+async def scroll_to(assistant: VoicePipelineAgent, text: str | AsyncIterable[str]):
     global bc
     
+    substring = "[[CONTENT]]"
+    
     print("[[SCROLL_TO]] ATTEMPTING SCROLL")
-
+    
     try:
-        xpath = f"//*[contains(text(), '{text}')]"
+        if isinstance(text, AsyncIterable):
+            # Gather the async generator into a single string
+            text = ''.join([chunk async for chunk in text])
+        else:
+            raise TypeError("Unsupported text type; expected str or AsyncIterable[str]")    
+        
+        # Find the substring and generate the XPath
+        index = text.find(substring) + len(substring) + 2  # Account for substring length, empty string, and start quote: ' "'
+        search = text[index:index+20]
+        print("[[SCROLL_TO]] SEARCH", search)
+        xpath = f"//*[contains(text(), '{search}')]"
+        
+        # Scroll to the element using XPath
         bc.scroll_to(by=By.XPATH, value=xpath)
     except Exception as e:
         print("[[SCROLL_TO]] ERROR:", e)
     finally:
         return text
     
-=======
->>>>>>> Stashed changes
 class AssistantFnc(llm.FunctionContext):
     global bc
     
@@ -71,7 +83,7 @@ class AssistantFnc(llm.FunctionContext):
                 if response.status == 200:
                     bc.get(page)
                     # toc = await bc.generate_table_of_contents()
-                    # mainContent = await bc.generate_contents()
+                    # mainContent = await bc.generate_cosntents()
                     
                     global PAGE
                     PAGE = page
@@ -139,6 +151,7 @@ async def entrypoint(ctx: JobContext):
     logger.info(f"connecting to room {ctx.room.name}")
     await ctx.connect(auto_subscribe=AutoSubscribe.AUDIO_ONLY)
 
+    # Wait for the first participant to connect
     participant = await ctx.wait_for_participant()
     logger.info(f"starting voice assistant for participant {participant.identity}")
     
@@ -157,7 +170,7 @@ async def entrypoint(ctx: JobContext):
         fnc_ctx=fnc_ctx,
         max_nested_fnc_calls=10,
         allow_interruptions=True,
-        # before_tts_cb=scroll_to,
+        before_tts_cb=scroll_to,
     )
 
     agent.start(ctx.room, participant)
@@ -176,6 +189,7 @@ async def entrypoint(ctx: JobContext):
         stream = oai.chat(chat_ctx=chat_ctx, fnc_ctx=fnc_ctx)
         asyncio.create_task(agent.say(stream))
 
+    # The agent should be polite and greet the user when it joins :)
     await agent.say("Hey, how can I help you today?", allow_interruptions=True)
 
 
