@@ -75,8 +75,6 @@ class AssistantFnc(llm.FunctionContext):
         async with aiohttp.ClientSession() as session:
             async with session.get(website_url) as response:
                 if response.status == 200:
-                    html_content = await response.text()
-
                     if not self.bc:
                         self.bc = BrowserController()
                     
@@ -101,15 +99,13 @@ class AssistantFnc(llm.FunctionContext):
         async with aiohttp.ClientSession() as session:
             async with session.get(content_url) as response:
                 if response.status == 200:
-                    html_content = await response.text()
-
                     if not self.bc:
                         self.bc = BrowserController()
                     
                     self.bc.get(content_url)
-                    TOC = self.bc.get_contents()
+                    contents = self.bc.get_contents()
 
-                    return f"Main contents: {content_url}."
+                    return f"Main contents: {contents}."
                 else:
                     logger.error(f"Error fetching contents {response}")
                     raise Exception(f"An error occurred while fetching the TOC for {content_url}.")
